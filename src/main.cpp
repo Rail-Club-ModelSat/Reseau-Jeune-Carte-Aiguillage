@@ -1,26 +1,51 @@
 #include <Arduino.h>
 #include <LocoNet.h>
+#include <ServoTimer2.h>
 #include <EEPROM.h>
+#include <ConfigCarte.h>
+
 #include "constante.h"
 
-lnMsg        *LnPacket;
 
-void processeLocoNetPacket() {
+lnMsg *LnPacket;
+
+void start() {
+  Serial.begin(9600);
+  LocoNet.init(LN_TX_PIN);
+  pinMode(RELAI_PIN, OUTPUT);
+  pinMode(N_BUTTON_PIN, INPUT_PULLUP);
+  pinMode(D_BUTTON_PIN, INPUT_PULLUP);
+  etatPossitionAiguillage = TURNOUT_NORMAL;
+}
+
+void setup() {
+  start();
+}
+
+void serialEvent() {
+  int bufferCarathere = 0;
+  do {
+    bufferCarathere = Serial.available();
+    getCarathere(Serial.read());
+  } while (bufferCarathere > 0);
+}
+
+void loop() {
   LnPacket = LocoNet.receive();
   if (LnPacket) {
     LocoNet.processSwitchSensorMessage(LnPacket);
   }
 }
 
-void loop() {
-  processeLocoNetPacket();
-}
+// Callbacks from LocoNet.processSwitchSensorMessage() ...
+// We tie into the ones connected to turnouts so we can capture anything
+// that can change (or indicatea change to) a turnout's position.
 
-void notifySwitchRequest(uint16_t Address, uint8_t Output, uint8_t Direction)
+void notifySwitchRequest( uint16_t Address, uint8_t Output, uint8_t Direction )
 { if (Address == ADRESSE_AIGUILL) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } }
 
-void notifySwitchReport(uint16_t Address, uint8_t Output, uint8_t Direction)
+void notifySwitchReport( uint16_t Address, uint8_t Output, uint8_t Direction )
 { if (Address == ADRESSE_AIGUILL) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } }
 
-void notifySwitchState(uint16_t Address, uint8_t Output, uint8_t Direction)
+void notifySwitchState( uint16_t Address, uint8_t Output, uint8_t Direction )
 { if (Address == ADRESSE_AIGUILL) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } }
