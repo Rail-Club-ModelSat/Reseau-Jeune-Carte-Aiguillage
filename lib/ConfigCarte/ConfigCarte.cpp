@@ -1,69 +1,185 @@
 #include <Arduino.h>
+#include <EEPROM.h>
 #include "ConfigCarte.h"
 
-#define MENU_REGLAGE_POINT_MILLIEU                  77   // M
-#define MENU_REGLAGE_GAUCHE_DROITE                  80   // P
-#define MENU_REGLAGE_ADRESSE_AIGUILLAGE             65   // A
-#define MENU_REGLAGE_ADRESSE_DETECTION              68   // D
-#define MENU_REGLAGE_NOMBRE_AIGUILLAGE              78   // N
-#define MENU_REGLAGE_ISSOLEMENT                     73   // I
-#define MENU_MODE_CONFIGURATION                     67   // C
-#define MENU_HELP                                   63   // ?
-#define FIN_TRANMISSION                             -1   // null
+enum { exploitation, accueil, reglageAdresseAiguillage, reglageAdresseDetection, reglageGaucheDroite, reglageIssolement, reglageNombreAiguillage, reglagePointMillieu } menuConfiguration;
 
-void getCarathere(char lectureCarathere) {
-    if (mode == configuration) {
+char message[TAILLE_MAX_SERIAL_MESSAGE];
 
-        switch (lectureCarathere) {
-            case MENU_HELP:
-                Serial.println("MENU_HELP");
-                Serial.println("M : Réglage point millieu servo moteur");
-                Serial.println("P : Réglage fin de course gauche / droite");
-                Serial.println("A : Réglage adresse commande aiguillage");
-                Serial.println("D : Réglage adresse detection");
-                Serial.println("N : Réglage nombre de moteur aiguillage");
-                Serial.println("I : Issolement carte");
-                Serial.println("C : Quité le mode configuration");
-                Serial.println("? : HELP !");
-                Serial.println("");
-                Serial.println("Commande (M/P/A/D/T/I/C/?) : ");
+bool nouveauMessageDisponible = true;
+
+
+void purgeMessage() {
+    strcpy(message, "");
+    Serial.print("\x1b[2J\x1b[;H");
+    nouveauMessageDisponible = true;
+    prossesMenu();
+}
+
+void menuHelp() {
+
+    Serial.println("");
+
+    Serial.println("MENU_HELP");
+    Serial.print(MENU_REGLAGE_POINT_MILLIEU);
+    Serial.println(" : Réglage point millieu servo moteur");
+    Serial.print(MENU_REGLAGE_GAUCHE_DROITE);
+    Serial.println(" : Réglage fin de course gauche / droite");
+    Serial.print(MENU_REGLAGE_ADRESSE_AIGUILLAGE);
+    Serial.println(" : Réglage adresse commande aiguillage");
+    Serial.print(MENU_REGLAGE_ADRESSE_DETECTION);
+    Serial.println(" : Réglage adresse detection");
+    Serial.print(MENU_REGLAGE_NOMBRE_AIGUILLAGE);
+    Serial.println(" : Réglage nombre de moteur aiguillage");
+    Serial.print(MENU_REGLAGE_ISSOLEMENT);
+    Serial.println(" : Issolement carte");
+    Serial.print(MENU_EXIT_MODE_CONFIGURATION);
+    Serial.println(" : Quité le mode configuration");
+    Serial.print(MENU_HELP);
+    Serial.println(" : Commande help");
+    Serial.println("");
+}
+
+void menuReglageAdresseAiguillage() {
+    
+    Serial.println("reglage adresse : ");
+
+    if (strstr(message, MENU_EXIT_MODE_CONFIGURATION)) {
+        menuConfiguration = accueil;
+        purgeMessage();
+    }
+
+}
+
+void menuExploitation() {
+
+    Serial.println("Entrée 'C' pour passer en mode configuration : ");
+    if (strstr(message, MENU_MODE_CONFIGURATION)) {
+        menuConfiguration = accueil;
+        purgeMessage();
+    }
+
+}
+
+void menuAccueil() {
+
+    if (strstr(message, MENU_HELP)) {
+
+        menuHelp();
+        strcpy(message, "");
+        nouveauMessageDisponible = true;
+        prossesMenu();
+
+    } else if (strstr(message, MENU_REGLAGE_GAUCHE_DROITE)) {
+
+        menuConfiguration = reglageGaucheDroite;
+        purgeMessage();
+
+    } else if (strstr(message, MENU_REGLAGE_ADRESSE_AIGUILLAGE)) {
+
+        menuConfiguration = reglageAdresseAiguillage;
+        purgeMessage();
+        
+    } else if (strstr(message, MENU_REGLAGE_ADRESSE_DETECTION)) {
+
+        menuConfiguration = reglageAdresseDetection;
+        purgeMessage();
+        
+    } else if (strstr(message, MENU_REGLAGE_NOMBRE_AIGUILLAGE)) {
+
+        menuConfiguration = reglageNombreAiguillage;
+        purgeMessage();
+        
+    } else if (strstr(message, MENU_REGLAGE_ISSOLEMENT)) {
+
+        menuConfiguration = reglageIssolement;
+        purgeMessage();
+        
+    } else if (strstr(message, MENU_EXIT_MODE_CONFIGURATION)) {
+
+        menuConfiguration = exploitation;
+        purgeMessage();
+        
+    } else {
+
+        strcpy(message, "");
+        char buffer[33];
+        sprintf(buffer, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s", "Commande (", MENU_REGLAGE_POINT_MILLIEU, "/", MENU_REGLAGE_GAUCHE_DROITE, "/", MENU_REGLAGE_ADRESSE_AIGUILLAGE, "/", MENU_REGLAGE_ADRESSE_DETECTION, "/", MENU_REGLAGE_NOMBRE_AIGUILLAGE, "/", MENU_REGLAGE_ISSOLEMENT, "/", MENU_EXIT_MODE_CONFIGURATION, "/", MENU_HELP, ") : ");
+        Serial.write(buffer);
+
+        Serial.println("");
+        
+    }
+
+}
+
+void prossesMenu() {
+
+    if (nouveauMessageDisponible) {
+
+        switch (menuConfiguration) {
+            case reglageAdresseAiguillage:
+                menuReglageAdresseAiguillage();
+
                 break;
-            
-            case MENU_MODE_CONFIGURATION:
-                Serial.println("MENU_MODE_CONFIGURATION");
+
+            case reglageAdresseDetection:
+
                 break;
 
-            case MENU_REGLAGE_ADRESSE_AIGUILLAGE:
-                Serial.println("MENU_REGLAGE_ADRESSE_AIGUILLAGE");
+            case reglageGaucheDroite:
+
                 break;
 
-            case MENU_REGLAGE_ADRESSE_DETECTION:
-                Serial.println("MENU_REGLAGE_ADRESSE_DETECTION");
+            case reglageIssolement:
+
                 break;
 
-            case MENU_REGLAGE_GAUCHE_DROITE:
-                Serial.println("MENU_REGLAGE_GAUCHE_DROITE");
+            case reglageNombreAiguillage:
+
                 break;
 
-            case MENU_REGLAGE_ISSOLEMENT:
-                Serial.println("MENU_REGLAGE_ISSOLEMENT");
+            case reglagePointMillieu:
+
                 break;
 
-            case MENU_REGLAGE_NOMBRE_AIGUILLAGE:
-                Serial.println("MENU_REGLAGE_NOMBRE_AIGUILLAGE");
+            case accueil:
+                menuAccueil();
                 break;
 
-            case MENU_REGLAGE_POINT_MILLIEU:
-                Serial.println("MENU_REGLAGE_POINT_MILLIEU");
-                break;
-
-            case FIN_TRANMISSION:
+            case exploitation:
+                menuExploitation();
                 break;
             
             default:
-                Serial.println("Commande (M/P/A/D/T/I/C/?) : ");
                 break;
         }
 
+        Serial.println(message);
+        nouveauMessageDisponible = false; // Réinitialiser le flag
     }
+
+}
+
+bool getCarathere(char lectureCarathere) {
+    static byte indexMessage = 0;
+    boolean messageEnCours = true;
+
+    if (lectureCarathere != -1) {
+        switch (lectureCarathere) {
+            case '\n': // Fin de message
+                message[indexMessage] = '\0';
+                indexMessage = 0;
+                messageEnCours = false;
+                nouveauMessageDisponible = true;
+                break;
+            default:
+                if (indexMessage < TAILLE_MAX_SERIAL_MESSAGE) {
+                    message[indexMessage++] = (char)lectureCarathere;
+                }
+                break;
+        }
+    }
+
+    return messageEnCours;
 }

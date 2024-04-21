@@ -1,11 +1,9 @@
 #include <Arduino.h>
 #include <LocoNet.h>
 #include <ServoTimer2.h>
-#include <EEPROM.h>
 #include <ConfigCarte.h>
 
 #include "constante.h"
-
 
 lnMsg *LnPacket;
 
@@ -23,11 +21,16 @@ void setup() {
 }
 
 void serialEvent() {
-  int bufferCarathere = 0;
-  do {
-    bufferCarathere = Serial.available();
-    getCarathere(Serial.read());
-  } while (bufferCarathere > 0);
+
+  boolean messageEnCours = true;
+
+  while (Serial.available() && messageEnCours) {
+
+    int lectureCarathere = Serial.read();
+    messageEnCours = getCarathere(lectureCarathere);
+
+  }
+
 }
 
 void loop() {
@@ -35,6 +38,9 @@ void loop() {
   if (LnPacket) {
     LocoNet.processSwitchSensorMessage(LnPacket);
   }
+
+  prossesMenu();
+
 }
 
 // Callbacks from LocoNet.processSwitchSensorMessage() ...
@@ -49,3 +55,10 @@ void notifySwitchReport( uint16_t Address, uint8_t Output, uint8_t Direction )
 
 void notifySwitchState( uint16_t Address, uint8_t Output, uint8_t Direction )
 { if (Address == ADRESSE_AIGUILL) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } }
+
+void notifyPower(uint8_t State) {
+  if (State) { 
+    // Faire clignoté la led rouge
+  }
+  
+}

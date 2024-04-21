@@ -15,6 +15,8 @@
 #define N_BUTTON_PIN  2
 #define D_BUTTON_PIN  3
 
+bool etatPowerDCC;
+
 int  etatPossitionAiguillage;
 int  old_etatPossitionAiguillage;
 
