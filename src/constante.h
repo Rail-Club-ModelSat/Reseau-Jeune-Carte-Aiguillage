@@ -15,14 +15,7 @@
 #define N_BUTTON_PIN  2
 #define D_BUTTON_PIN  3
 
-#define MENU_REGLAGE_POINT_MILLIEU                  "M"   // M
-#define MENU_REGLAGE_GAUCHE_DROITE                  "P"   // P
-#define MENU_REGLAGE_ADRESSE_AIGUILLAGE             "A"   // A
-#define MENU_REGLAGE_ADRESSE_DETECTION              "D"   // D
-#define MENU_REGLAGE_NOMBRE_AIGUILLAGE              "N"   // N
-#define MENU_REGLAGE_ISSOLEMENT                     "I"   // I
-#define MENU_MODE_CONFIGURATION                     "C"   // C
-#define MENU_HELP                                   "?"   // ?
+bool etatPowerDCC;
 
 int  etatPossitionAiguillage;
 int  old_etatPossitionAiguillage;
