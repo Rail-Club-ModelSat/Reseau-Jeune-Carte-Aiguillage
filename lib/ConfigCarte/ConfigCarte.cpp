@@ -1,20 +1,109 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 #include <ServoTimer2.h>
+
+
 #include "ConfigCarte.h"
 
 ServoTimer2   ServoMoteur;
-
-enum { exploitation, accueil, reglage, reglageAdresseAiguillage, reglageAdresseDetection, reglageGaucheDroite, reglageIssolement, reglageNombreAiguillage, reglagePointMillieu } menuConfiguration;
 
 char message[TAILLE_MAX_SERIAL_MESSAGE];
 bool nouveauMessageDisponible = true;
 
 void purgeMessage() {
-    strcpy(message, "");
+    memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
     Serial.print("\x1b[2J\x1b[;H");
     nouveauMessageDisponible = true;
     prossesMenu();
+}
+
+int getMaxServoGauche() {
+    int maxAngleServo = 0;
+    EEPROM.get(ADRESSE_MEMOIRE_ANGLE_GAUCHE, maxAngleServo);
+
+    return maxAngleServo;
+}
+
+int getMaxServoDroite() {
+    int maxAngleServo = 0;
+    EEPROM.get(ADRESSE_MEMOIRE_ANGLE_DROITE, maxAngleServo);
+
+    return maxAngleServo;
+}
+
+int getAdresseAiguillage() {
+    int maxAngleServo = 0;
+    EEPROM.get(ADRESSE_MEMOIRE_ADRESSE_AIGUILLAGE, maxAngleServo);
+
+    return maxAngleServo;
+}
+
+int getAdresseDetecteur1() {
+    int maxAngleServo = 0;
+    EEPROM.get(ADRESSE_MEMOIRE_ADRESSE_DETECTION1, maxAngleServo);
+
+    return maxAngleServo;
+}
+
+int getAdresseDetecteur2() {
+    int maxAngleServo = 0;
+    EEPROM.get(ADRESSE_MEMOIRE_ADRESSE_DETECTION2, maxAngleServo);
+
+    return maxAngleServo;
+}
+
+int getNombreAiguillage() {
+    int maxAngleServo = 0;
+    EEPROM.get(ADRESSE_MEMOIRE_NOMBRE_MOTEUR, maxAngleServo);
+
+    return maxAngleServo;
+}
+
+bool getIssolementCarte() {
+    bool maxAngleServo;
+    EEPROM.get(ADRESSE_MEMOIRE_CARTE_ISOLEE, maxAngleServo);
+
+    return maxAngleServo;
+}
+
+void menuReglage() {
+
+    Serial.println("");
+
+    Serial.println("Paramettre Carte :");
+    Serial.println("");
+
+    Serial.print("Carte Issolée : ");
+
+    if (!getIssolementCarte()) {
+        Serial.println("Issolée");
+        Serial.println("");
+    } else {
+        Serial.println("En Service");
+        Serial.println("");
+    }
+
+    Serial.print("Nombre Moteur : ");
+    Serial.println(getNombreAiguillage());
+    Serial.println("");
+
+    Serial.print("Adresse Aiguillage : ");
+    Serial.println(getAdresseAiguillage());
+    Serial.println("");
+
+    Serial.print("Adresse Detecteur 1 : ");
+    Serial.println(getAdresseDetecteur1());
+    Serial.print("Adresse Detecteur 2 : ");
+    Serial.println(getAdresseDetecteur2());
+    Serial.println("");
+
+    Serial.println("Angle servomoteur : ");
+    Serial.print("gauche : ");
+    Serial.println(getMaxServoGauche());
+    Serial.print("droite : ");
+    Serial.println(getMaxServoDroite());
+    Serial.println("");
+
 }
 
 void menuHelp() {
@@ -59,13 +148,18 @@ void menuAccueil() {
     if (strstr(message, MENU_HELP)) {
 
         menuHelp();
-        strcpy(message, "");
+        memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
         nouveauMessageDisponible = true;
         prossesMenu();
 
     } else if (strstr(message, MENU_REGLAGE_GAUCHE_DROITE)) {
 
         menuConfiguration = reglageGaucheDroite;
+        purgeMessage();
+        
+    } else if (strstr(message, MENU_REGLAGE_POINT_MILLIEU)) {
+
+        menuConfiguration = reglagePointMillieu;
         purgeMessage();
 
     } else if (strstr(message, MENU_REGLAGE_ADRESSE_AIGUILLAGE)) {
@@ -93,11 +187,18 @@ void menuAccueil() {
         menuConfiguration = exploitation;
         purgeMessage();
         
+    } else if (strstr(message, MENU_REGLAGE)) {
+
+        menuReglage();
+        memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
+        nouveauMessageDisponible = true;
+        prossesMenu();
+        
     } else {
 
-        strcpy(message, "");
+        memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
         char buffer[33];
-        sprintf(buffer, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s", "Commande (", MENU_REGLAGE_POINT_MILLIEU, "/", MENU_REGLAGE_GAUCHE_DROITE, "/", MENU_REGLAGE_ADRESSE_AIGUILLAGE, "/", MENU_REGLAGE_ADRESSE_DETECTION, "/", MENU_REGLAGE_NOMBRE_AIGUILLAGE, "/", MENU_REGLAGE_ISSOLEMENT, "/", MENU_EXIT_MODE_CONFIGURATION, "/", MENU_HELP, ") : ");
+        sprintf(buffer, "%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s%s", "Commande (", MENU_REGLAGE , "/" , MENU_REGLAGE_POINT_MILLIEU, "/", MENU_REGLAGE_GAUCHE_DROITE, "/", MENU_REGLAGE_ADRESSE_AIGUILLAGE, "/", MENU_REGLAGE_ADRESSE_DETECTION, "/", MENU_REGLAGE_NOMBRE_AIGUILLAGE, "/", MENU_REGLAGE_ISSOLEMENT, "/", MENU_EXIT_MODE_CONFIGURATION, "/", MENU_HELP, ") : ");
         Serial.write(buffer);
 
         Serial.println("");
@@ -119,7 +220,7 @@ void menuReglageAdresseAiguillage() {
 
         int adresse = atoi(message);
         if (adresse > 0 && adresse < 2048) {
-            EEPROM.write(ADRESSE_MEMOIRE_ADRESSE_AIGUILLAGE, adresse);
+            EEPROM.put(ADRESSE_MEMOIRE_ADRESSE_AIGUILLAGE, adresse);
             adresseConfigure = true;
         } else {
             Serial.println("Entrée une adresse entre 0 et 2048 : ");
@@ -159,9 +260,9 @@ void menuReglageAdresseDetection() {
         if (!adresseDetecteur1) {
             adresse1 = atoi(message);
             if (adresse1 > 0 && adresse1 < 2048) {
-                EEPROM.write(ADRESSE_MEMOIRE_ADRESSE_DETECTION1, adresse1);
+                EEPROM.put(ADRESSE_MEMOIRE_ADRESSE_DETECTION1, adresse1);
                 adresseDetecteur1 = true;
-                strcpy(message, "");
+                memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
             } else {
                 Serial.print("Detect 1 : ");
                 Serial.println("Entrée une adresse entre 0 et 2048 : ");
@@ -172,7 +273,7 @@ void menuReglageAdresseDetection() {
         if (!adresseDetecteur2) {
             adresse2 = atoi(message);
             if (adresse2 > 0 && adresse2 < 2048) {
-                EEPROM.write(ADRESSE_MEMOIRE_ADRESSE_DETECTION2, adresse2);
+                EEPROM.put(ADRESSE_MEMOIRE_ADRESSE_DETECTION2, adresse2);
                 adresseDetecteur2 = true;
             } else {
                 Serial.print("Detect 2 : ");
@@ -211,15 +312,20 @@ void menuReglageGaucheDroite() {
     static bool servo = false;
     static bool gauche = false;
     static bool droite = false;
-    static int maxGauche = DEFAULT_SERVO_MAX_GAUCHE;
-    static int maxDroite = DEFAULT_SERVO_MAX_DROITE;
 
-    static int angleGauche = 1500;
-    static int angleDroite = 1500;
+    static int angleGauche = getMaxServoGauche();
+    static int angleDroite = getMaxServoDroite();
 
     Serial.println("");
     Serial.println("Configuration possition gauche / droite servo");
     Serial.println("");
+
+    Serial.println("");
+    Serial.println("Entrée '+' pour ajouter de l'angle");
+    Serial.println("Entrée '-' pour retirée de l'angle");
+    Serial.println("Entrée 'D' pour la configuration par défault (moteur decapod)");
+    Serial.println("Entrée 'V' pour validée");
+    Serial.println(""); Serial.println("");
 
     ServoMoteur.attach(PIN_SERVO);
 
@@ -229,26 +335,27 @@ void menuReglageGaucheDroite() {
 
             ServoMoteur.write(angleGauche);
 
-            Serial.println("");
-            Serial.println("Entrée '+' pour ajouter de l'angle");
-            Serial.println("Entrée '-' pour retirée de l'angle");
-            Serial.println("Entrée 'V' pour validée");
-            Serial.println(""); Serial.println("");
-
             if (strstr(message, "+")) {
 
-                strcpy(message, "");
+                memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
                 angleGauche = angleGauche - 10;
 
             } else if (strstr(message, "-")) {
 
-                strcpy(message, "");
+                memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
                 angleGauche = angleGauche + 10;
+
+            } else if (strstr(message, "D")) {
+
+                memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
+                EEPROM.put(ADRESSE_MEMOIRE_ANGLE_GAUCHE, DEFAULT_SERVO_MAX_GAUCHE);
+                angleGauche = DEFAULT_SERVO_MAX_GAUCHE;
+                gauche = true;
 
             } else if (strstr(message, "V")) {
 
-                strcpy(message, "");
-                EEPROM.write(ADRESSE_MEMOIRE_ANGLE_GAUCHE, angleGauche);
+                memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
+                EEPROM.put(ADRESSE_MEMOIRE_ANGLE_GAUCHE, angleGauche);
                 gauche = true;
 
             }
@@ -262,31 +369,32 @@ void menuReglageGaucheDroite() {
 
             ServoMoteur.write(angleDroite);
 
-            Serial.println("");
-            Serial.println("Entrée '+' pour ajouter de l'angle");
-            Serial.println("Entrée '-' pour retirée de l'angle");
-            Serial.println("Entrée 'V' pour validée");
-            Serial.println(""); Serial.println("");
-
             if (strstr(message, "+")) {
 
-                strcpy(message, "");
+                memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
                 angleDroite = angleDroite + 10;
 
             } else if (strstr(message, "-")) {
 
-                strcpy(message, "");
+                memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
                 angleDroite = angleDroite - 10;
+
+            }else if (strstr(message, "D")) {
+
+                memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
+                EEPROM.put(ADRESSE_MEMOIRE_ANGLE_DROITE, DEFAULT_SERVO_MAX_DROITE);
+                angleDroite = DEFAULT_SERVO_MAX_DROITE;
+                droite = true;
 
             } else if (strstr(message, "V")) {
 
-                strcpy(message, "");
-                EEPROM.write(ADRESSE_MEMOIRE_ANGLE_DROITE, angleDroite);
+                memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
+                EEPROM.put(ADRESSE_MEMOIRE_ANGLE_DROITE, angleDroite);
                 droite = true;
 
             }
 
-            Serial.print("DROITE : "); Serial.print(angleGauche);
+            Serial.print("DROITE : "); Serial.print(angleDroite);
             return;
             
         }
@@ -338,15 +446,15 @@ void menuReglageIssolement() {
                 Serial.println("CARTE EN SERVICE");
             }
 
-            strcpy(message, "");
+            memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
 
         }
 
         if (strstr(message, "V")) {
 
-            EEPROM.write(ADRESSE_MEMOIRE_CARTE_ISOLEE, isolementCarte);
+            EEPROM.put(ADRESSE_MEMOIRE_CARTE_ISOLEE, isolementCarte);
             Serial.println("Paramettre enregistrés");
-            strcpy(message, "");
+            memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
 
             parametres = true;
 
@@ -368,18 +476,18 @@ void menuReglageIssolement() {
 void menuReglagePointMillieu() {
     
     Serial.print("\x1b[2J\x1b[;H");
+    ServoMoteur.attach(PIN_SERVO);
 
     Serial.println("");
     Serial.println("");
     Serial.println("REGLAGE POINT MILLIEU...");
     Serial.println("Entrée 'E' pour quitée : ");
 
-    ServoMoteur.attach(PIN_SERVO);
     ServoMoteur.write(POINT_MILLIEU_SERVO);
-    ServoMoteur.detach();
 
     if (strstr(message, MENU_EXIT_MODE_CONFIGURATION)) {
         menuConfiguration = accueil;
+        ServoMoteur.detach();
         purgeMessage();
     }
 }
@@ -397,7 +505,7 @@ void menuReglageNombreAiguillage() {
 
         int adresse = atoi(message);
         if (adresse == 1 || adresse == 2) {
-            EEPROM.write(ADRESSE_MEMOIRE_NOMBRE_MOTEUR, adresse);
+            EEPROM.put(ADRESSE_MEMOIRE_NOMBRE_MOTEUR, adresse);
             adresseConfigure = true;
         } else {
             Serial.println("Entrée le nombre de moteur entre 1 et 2 : ");
@@ -416,10 +524,6 @@ void menuReglageNombreAiguillage() {
         menuConfiguration = accueil;
         purgeMessage();
     }
-}
-
-void menuReglage() {
-    
 }
 
 void prossesMenu() {
@@ -449,10 +553,6 @@ void prossesMenu() {
 
             case reglagePointMillieu:
                 menuReglagePointMillieu();
-                break;
-
-            case reglage:
-                menuReglage();
                 break;
 
             case accueil:

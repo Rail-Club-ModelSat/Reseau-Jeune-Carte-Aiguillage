@@ -14,16 +14,16 @@
 #define MENU_REGLAGE                                "R"   // R
 #define MENU_HELP                                   "?"   // ?
 
-#define ADRESSE_MEMOIRE_ADRESSE_AIGUILLAGE          10
-#define ADRESSE_MEMOIRE_ADRESSE_DETECTION1          15
-#define ADRESSE_MEMOIRE_ADRESSE_DETECTION2          16
+#define ADRESSE_MEMOIRE_ADRESSE_AIGUILLAGE          1000
+#define ADRESSE_MEMOIRE_ADRESSE_DETECTION1          1500
+#define ADRESSE_MEMOIRE_ADRESSE_DETECTION2          1600
 
-#define ADRESSE_MEMOIRE_ANGLE_GAUCHE                17
-#define ADRESSE_MEMOIRE_ANGLE_DROITE                19
+#define ADRESSE_MEMOIRE_ANGLE_GAUCHE                1700
+#define ADRESSE_MEMOIRE_ANGLE_DROITE                1800
 
-#define ADRESSE_MEMOIRE_CARTE_ISOLEE                21
+#define ADRESSE_MEMOIRE_CARTE_ISOLEE                2100
 
-#define ADRESSE_MEMOIRE_NOMBRE_MOTEUR               22
+#define ADRESSE_MEMOIRE_NOMBRE_MOTEUR               2200
 
 #define DEFAULT_SERVO_MAX_GAUCHE                    1050
 #define DEFAULT_SERVO_MAX_DROITE                    1800
@@ -31,15 +31,17 @@
 
 #define TAILLE_MAX_SERIAL_MESSAGE 10
 
+enum { exploitation, accueil, reglageAdresseAiguillage, reglageAdresseDetection, reglageGaucheDroite, reglageIssolement, reglageNombreAiguillage, reglagePointMillieu } menuConfiguration;
+
 bool getCarathere(char lectureCarathere);
 void prossesMenu();
 
-// class ConfigCarte {
-
-//     public:
-
-//     private:
-
-// };
+int getMaxServoGauche();
+int getMaxServoDroite();
+int getAdresseAiguillage();
+int getAdresseDetecteur1();
+int getAdresseDetecteur2();
+int getNombreAiguillage();
+bool getIssolementCarte();
 
 #endif // ConfigCarte_h
