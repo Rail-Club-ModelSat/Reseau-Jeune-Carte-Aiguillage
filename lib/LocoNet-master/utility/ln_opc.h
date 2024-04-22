@@ -661,9 +661,9 @@ extern "C" {
 
 	/* loconet opcodes */
 #define OPC_BUSY          0x81
-#define OPC_GPOFF         0x82
+#define OPC_GPOFF         0x85
 #define OPC_GPON          0x83
-#define OPC_IDLE          0x85
+#define OPC_IDLE          0x82
 #define OPC_LOCO_SPD      0xa0
 #define OPC_LOCO_DIRF     0xa1
 #define OPC_LOCO_SND      0xa2

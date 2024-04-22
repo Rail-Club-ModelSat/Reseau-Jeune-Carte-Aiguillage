@@ -1,163 +1,260 @@
 #include <Arduino.h>
 #include <LocoNet.h>
-#include <ServoTimer2.h>
-#include <EEPROM.h>
+#include <ConfigCarte.h>
+#include <GestionAiguillage.h>
 
-// Définition des adresse
-#define ADRESSE_AIGUILL 5
-#define ADRESSE_SENSOR1 202
-#define ADRESSE_SENSOR2 203
-
-// Valeur Normal / Dévié servomoteur
-#define SERVO_VALL_NORMAL  1050    // 50°C
-#define SERVO_VALL_TURNOUT 1800    // 120°C
-
-#define POINT_MILLIEU_SERVO 1500   // 90°
-
-#define LN_TX_PIN     7
-#define RELAI_PIN     5
-#define SERVO_PIN     9
-#define N_BUTTON_PIN  2
-#define D_BUTTON_PIN  3
-
-int  etatPossitionAiguillage;
-int  old_etatPossitionAiguillage;
-
-// Gestion du rebond pour les boutons
-bool didStatusN = false;
-bool oldDidStatusN = false;
-unsigned long lastDebounceTimeN = 0;
-unsigned long debounceDelayN = 20;
-
-bool didStatusD = false;
-bool oldDidStatusD = false;
-unsigned long lastDebounceTimeD = 0;
-unsigned long debounceDelayD = 20;
+#include "constante.h"
 
 lnMsg        *LnPacket;
-ServoTimer2   ServoMoteur;
 
-enum TurnoutState {
-  TURNOUT_NORMAL = 1,
-  TURNOUT_DIVERGING = 0
-};
 
-void pointMillieuServo() {
-  ServoMoteur.attach(SERVO_PIN);
-  ServoMoteur.write(POINT_MILLIEU_SERVO);
-  ServoMoteur.detach();
+/**
+ * Fonction : setup
+ * ----------------
+ * Initialise le système, configure les broches et affiche les informations de démarrage sur le moniteur série.
+ */
+void setup() {
+  LocoNet.init();
+
+  pinMode(PIN_RELAIS, OUTPUT);
+  pinMode(PIN_BOUTON_DETECT1, INPUT_PULLUP);
+  pinMode(PIN_BOUTON_DETECT2, INPUT_PULLUP);
+
+  pinMode(PIN_LED_POSSITION_AIGUIL, OUTPUT);
+  pinMode(PIN_LED_DATA, OUTPUT);
+  pinMode(PIN_LED_ERREUR, OUTPUT);
+
+  Serial.begin(VITESSE_TRAMSMISSION);
+  Serial.println(F("")); Serial.println(F(""));
+  Serial.println(F("Rail Club ModelSat - Carte Loconet Arduino"));
+  Serial.println(F("Par MARTIN Mathis - V1.0.0"));
+  Serial.println(F("")); Serial.println(F("")); Serial.println(F(""));
+
+  if (!getIssolementCarte()) {
+    Serial.println(F("/!\\ CARTE ISSOLER /!\\"));
+    Serial.println(F(""));
+  }
+
+  digitalWrite(PIN_LED_DATA, HIGH);
+  digitalWrite(PIN_LED_POSSITION_AIGUIL, HIGH);
+
 }
 
+
+/**
+ * Fonction : serialEvent
+ * ----------------------
+ * Traite les événements série en lisant les caractères entrants tant qu'ils sont disponibles.
+ */
 void serialEvent() {
 
-  char carlu = 0;
-  int cardispo = 0;
+  boolean messageEnCours = true;
 
-  cardispo = Serial.available();
+  while (Serial.available() && messageEnCours) {
 
-  while(cardispo > 0) {
-    carlu = Serial.read();
+    char lectureCarathere = Serial.read();
+    messageEnCours = getCarathere(lectureCarathere);
 
-    if(carlu == 77) {
-      Serial.println("Réglage du point millieu : ");
-      pointMillieuServo();
-    }
-
-    cardispo = Serial.available();
-  }
-}
-
-void setServo(int state) {
-  int targetPosition = (state == TURNOUT_NORMAL) ? SERVO_VALL_NORMAL : SERVO_VALL_TURNOUT;
-
-  int currentPosition = ServoMoteur.read();
-  unsigned long previousMillis = millis();
-
-  while (currentPosition != targetPosition) {
-    unsigned long currentMillis = millis();
-
-    if (currentMillis - previousMillis >= 1) {
-      previousMillis = currentMillis;
-
-      currentPosition = (currentPosition < targetPosition) ? currentPosition + 1 : currentPosition - 1;
-      ServoMoteur.write(currentPosition);
-    }
-  }
-}
-
-void handleTurnoutPosition() {
-  if (etatPossitionAiguillage != old_etatPossitionAiguillage) {
-    old_etatPossitionAiguillage = etatPossitionAiguillage;
-    digitalWrite(RELAI_PIN, etatPossitionAiguillage);
-    ServoMoteur.attach(SERVO_PIN);
-    setServo(etatPossitionAiguillage);
-    ServoMoteur.detach();
-    Serial.print("Changement Etat aiguillage : ");
-    Serial.println(etatPossitionAiguillage);
-  }
-}
-
-void notifyButtonState(int buttonPin, int sensorAddress, const char *sensorName) {
-  bool &didStatus = (buttonPin == N_BUTTON_PIN) ? didStatusN : didStatusD;
-  bool &oldDidStatus = (buttonPin == N_BUTTON_PIN) ? oldDidStatusN : oldDidStatusD;
-  unsigned long &lastDebounceTime = (buttonPin == N_BUTTON_PIN) ? lastDebounceTimeN : lastDebounceTimeD;
-  unsigned long &debounceDelay = (buttonPin == N_BUTTON_PIN) ? debounceDelayN : debounceDelayD;
-
-  int reading = digitalRead(buttonPin);
-
-  if (reading != oldDidStatus) {
-    lastDebounceTime = millis();
   }
 
-  if ((millis() - lastDebounceTime) >= debounceDelay) {
-    if (reading != didStatus) {
-      didStatus = reading;
-      LocoNet.reportSensor(sensorAddress, reading);
-      Serial.print("Changement Etat ");
-      Serial.print(sensorName);
-      Serial.print(" : ");
-      Serial.println(reading);
-    }
-  }
-
-  oldDidStatus = reading;
 }
 
-void notifyButtonStates() {
-  notifyButtonState(N_BUTTON_PIN, ADRESSE_SENSOR1, "Sensor 1");
-  notifyButtonState(D_BUTTON_PIN, ADRESSE_SENSOR2, "Sensor 2");
-}
 
-void setup() {
-  Serial.begin(9600);
-  LocoNet.init(LN_TX_PIN);
-  pinMode(RELAI_PIN, OUTPUT);
-  pinMode(N_BUTTON_PIN, INPUT_PULLUP);
-  pinMode(D_BUTTON_PIN, INPUT_PULLUP);
-  etatPossitionAiguillage = TURNOUT_NORMAL;
-}
+/**
+ * Fonction : loconetMessage
+ * -------------------------
+ * Réceptionne et traite les messages Loconet reçus.
+ */
+void loconetMessage() {
 
-void loop() {
-  // Check for any received LocoNet packets
   LnPacket = LocoNet.receive();
+
   if (LnPacket) {
     LocoNet.processSwitchSensorMessage(LnPacket);
-    // this function will call the specially named functions below...
   }
 
-  handleTurnoutPosition();
-  notifyButtonStates();
 }
 
-// Callbacks from LocoNet.processSwitchSensorMessage() ...
-// We tie into the ones connected to turnouts so we can capture anything
-// that can change (or indicatea change to) a turnout's position.
 
-void notifySwitchRequest( uint16_t Address, uint8_t Output, uint8_t Direction )
-{ if (Address == ADRESSE_AIGUILL) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } }
+/**
+ * Fonction : getDetection
+ * -----------------------
+ * Vérifie l'état de détection des entrées et envoie des rapports de capteur Loconet selon l'état de détection.
+ */
+void getDetection() {
 
-void notifySwitchReport( uint16_t Address, uint8_t Output, uint8_t Direction )
-{ if (Address == ADRESSE_AIGUILL) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } }
+  bool etatDetection1 = getDetection1(PIN_BOUTON_DETECT1);
+  bool etatDetection2 = getDetection2(PIN_BOUTON_DETECT2);
 
-void notifySwitchState( uint16_t Address, uint8_t Output, uint8_t Direction )
-{ if (Address == ADRESSE_AIGUILL) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } }
+  if (etatDetection1) {
+    LocoNet.reportSensor(getAdresseDetecteur1(), etatDetection1);
+  }
+
+
+  if (etatDetection2 && getNombreAiguillage() == 2) {
+    LocoNet.reportSensor(getAdresseDetecteur1(), etatDetection2);
+  }
+
+}
+
+
+/**
+ * Fonction : getEtatSensLogique
+ * -----------------------------
+ * Calcule l'état logique actuel basé sur le sens et la position de l'aiguillage.
+ *
+ * @return bool : L'état logique calculé.
+ */
+bool getEtatSensLogique() {
+  bool etatSensLogique = getSensLogique() ^ etatPossitionAiguillage;
+  return etatSensLogique;
+}
+
+
+/**
+ * Fonction : gestionLedErreur
+ * ---------------------------
+ * Gère l'état de la LED d'erreur en fonction de l'état d'isolation de la carte et de l'alimentation DCC.
+ */
+void gestionLedErreur() {
+
+  if (!getIssolementCarte()) {
+
+    digitalWrite(PIN_LED_ERREUR, LOW);
+
+  } else if (!etatPowerDCC) {
+
+    static long currentTime = 0;
+    static unsigned long previousTime = 0;
+    static bool etatLedErreur = true;
+
+    currentTime = millis();
+    if((currentTime - previousTime) > 600){
+
+      digitalWrite(PIN_LED_ERREUR, etatLedErreur);
+      newLoconetData = false;
+
+      etatLedErreur = !etatLedErreur;
+
+      previousTime = currentTime;
+    }
+
+  } else {
+    digitalWrite(PIN_LED_ERREUR, HIGH);
+  }
+  
+}
+
+
+/**
+ * Fonction : newData
+ * ------------------
+ * Gère l'indication visuelle des nouvelles données Loconet à l'aide d'une LED.
+ */
+void newData() {
+  if (newLoconetData) {
+    static long currentTime = 0;
+    static unsigned long previousTime = 0;
+
+    digitalWrite(PIN_LED_DATA, LOW);
+
+    currentTime = millis();
+    if((currentTime - previousTime) > 300){
+
+      digitalWrite(PIN_LED_DATA, HIGH);
+      newLoconetData = false;
+
+      previousTime = currentTime;
+    }
+  }
+  
+}
+
+
+/**
+ * Fonction : dispatch
+ * -------------------
+ * Dispatch gère différentes fonctions de contrôle, y compris la gestion de menu, des LEDs, et des messages Loconet.
+ */
+void dispatch() {
+
+  prossesMenu();
+  gestionLedErreur();
+  newData();
+
+  if (getIssolementCarte() && menuConfiguration == exploitation) {
+    loconetMessage();
+    changementPossition(PIN_SERVO, PIN_RELAIS, getEtatSensLogique());
+    digitalWrite(PIN_LED_POSSITION_AIGUIL, !etatPossitionAiguillage);
+    getDetection();
+  }
+
+}
+
+
+/**
+ * Fonction : loop
+ * ---------------
+ * Boucle principale du programme
+ */
+void loop() {
+  dispatch();
+}
+
+
+/**
+ * Fonction : notifySwitchRequest
+ * ------------------------------
+ * Notifie une requête de commutation d'aiguillage et met à jour l'état de position.
+ *
+ * @param Address    Adresse de l'aiguillage.
+ * @param Output     Sortie contrôlée.
+ * @param Direction  Direction de la commutation.
+ */
+void notifySwitchRequest( uint16_t Address, uint8_t Output, uint8_t Direction ) { 
+  if (Address == getAdresseAiguillage()) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } 
+  newLoconetData = true;
+}
+
+
+/**
+ * Fonction : notifySwitchReport
+ * -----------------------------
+ * Notifie un rapport de commutation d'aiguillage et met à jour l'état de position.
+ *
+ * @param Address    Adresse de l'aiguillage.
+ * @param Output     Sortie contrôlée.
+ * @param Direction  Direction de la commutation.
+ */
+void notifySwitchReport( uint16_t Address, uint8_t Output, uint8_t Direction ) { 
+  if (Address == getAdresseAiguillage()) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } 
+  newLoconetData = true;  
+}
+
+
+/**
+ * Fonction : notifySwitchState
+ * ----------------------------
+ * Notifie l'état de commutation d'aiguillage et met à jour l'état de position.
+ *
+ * @param Address    Adresse de l'aiguillage.
+ * @param Output     Sortie contrôlée.
+ * @param Direction  Direction de la commutation.
+ */
+void notifySwitchState( uint16_t Address, uint8_t Output, uint8_t Direction ) { 
+  if (Address == getAdresseAiguillage()) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } 
+  newLoconetData = true;
+}
+
+
+/**
+ * Fonction : notifyPower
+ * ----------------------
+ * Notifie l'état de l'alimentation DCC et met à jour l'état des données Loconet.
+ *
+ * @param State    État de l'alimentation DCC.
+ */
+void notifyPower(uint8_t State) {
+  etatPowerDCC = State;
+  newLoconetData = true;
+}
