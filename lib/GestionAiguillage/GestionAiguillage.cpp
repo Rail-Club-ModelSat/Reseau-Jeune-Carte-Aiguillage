@@ -73,14 +73,7 @@ void changementPossition(uint8_t pinServo, uint8_t pinRelais, bool etatPossition
  */
 bool getDetection1(uint8_t pinBouton) {
     bool etatBouton = digitalRead(pinBouton);
-    static bool old_etatBouton = false;
-
-    if (old_etatBouton != etatBouton) {
-        old_etatBouton = etatBouton;
-        if (etatBouton) return true;
-    }
-
-    return false;
+    return etatBouton;
 }
 
 
@@ -94,12 +87,5 @@ bool getDetection1(uint8_t pinBouton) {
  */
 bool getDetection2(uint8_t pinBouton) {
     bool etatBouton = digitalRead(pinBouton);
-    static bool old_etatBouton = false;
-
-    if (old_etatBouton != etatBouton) {
-        old_etatBouton = etatBouton;
-        if (etatBouton) return true;
-    }
-
-    return false;
+    return etatBouton;
 }

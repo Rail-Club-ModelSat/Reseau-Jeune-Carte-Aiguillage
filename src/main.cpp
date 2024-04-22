@@ -14,7 +14,7 @@ lnMsg        *LnPacket;
  * Initialise le système, configure les broches et affiche les informations de démarrage sur le moniteur série.
  */
 void setup() {
-  LocoNet.init();
+  LocoNet.init(LN_TX_PIN);
 
   pinMode(PIN_RELAIS, OUTPUT);
   pinMode(PIN_BOUTON_DETECT1, INPUT_PULLUP);
@@ -83,17 +83,54 @@ void loconetMessage() {
  */
 void getDetection() {
 
-  bool etatDetection1 = getDetection1(PIN_BOUTON_DETECT1);
-  bool etatDetection2 = getDetection2(PIN_BOUTON_DETECT2);
+  bool etatDetection1 = !getDetection1(PIN_BOUTON_DETECT1);
+  bool etatDetection2 = !getDetection2(PIN_BOUTON_DETECT2);
 
-  if (etatDetection1) {
-    LocoNet.reportSensor(getAdresseDetecteur1(), etatDetection1);
+  static bool ancienEtat1 = false;
+  static bool ancienEtat2 = false;
+
+  static bool etatActuel1 = false;
+  static bool etatActuel2 = false;
+
+  static unsigned long delaiRebond = 60;
+
+  static unsigned long dernierTempsRebond1 = 0;
+  static unsigned long dernierTempsRebond2 = 0;
+
+  if (etatDetection1 != ancienEtat1) {
+    dernierTempsRebond1 = millis();
   }
 
-
-  if (etatDetection2 && getNombreAiguillage() == 2) {
-    LocoNet.reportSensor(getAdresseDetecteur1(), etatDetection2);
+  if (etatDetection2 != ancienEtat2) {
+    dernierTempsRebond2 = millis();
   }
+  
+  if ((millis() - dernierTempsRebond1) >= delaiRebond) {
+    if (etatActuel1 != etatDetection1) {
+
+      uint16_t adresseDetecte1 = getAdresseDetecteur1();
+
+      LocoNet.reportSensor(adresseDetecte1, etatDetection1);
+      newLoconetData = true;
+      etatActuel1 = etatDetection1;
+
+    }
+  }
+
+  if ((millis() - dernierTempsRebond2) >= delaiRebond) {
+    if (etatActuel2 != etatDetection2 && getNombreAiguillage() == 2) {
+
+      uint16_t adresseDetecte2 = getAdresseDetecteur2();
+
+      LocoNet.reportSensor(adresseDetecte2, etatDetection2);
+      newLoconetData = true;
+      etatActuel2 = etatDetection2;
+
+    }
+  }
+
+  ancienEtat1 = etatDetection1;
+  ancienEtat2 = etatDetection2;
 
 }
 
