@@ -1,15 +1,8 @@
-// #ifndef GestionAiguillage_h
-// #define GestionAiguillage_h
+#ifndef GestionAiguillage_h
+#define GestionAiguillage_h
 
-// class GestionAiguillage {
+bool getDetection1(uint8_t pinBouton);
+bool getDetection2(uint8_t pinBouton);
+void changementPossition(uint8_t pinServo, uint8_t pinRelais, bool etatPossitionAiguillage);
 
-//     public:
-//     GestionAiguillage();
-    
-
-//     private:
-    
-
-// };
-
-// #endif // CarteAiguillage_h
+#endif // CarteAiguillage_h

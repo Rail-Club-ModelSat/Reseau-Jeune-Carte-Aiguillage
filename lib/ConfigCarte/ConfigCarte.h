@@ -38,7 +38,7 @@ void prossesMenu();
 
 int getMaxServoGauche();
 int getMaxServoDroite();
-int getAdresseAiguillage();
+uint16_t getAdresseAiguillage();
 int getAdresseDetecteur1();
 int getAdresseDetecteur2();
 int getNombreAiguillage();

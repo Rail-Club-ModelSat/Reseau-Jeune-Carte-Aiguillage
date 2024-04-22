@@ -5,7 +5,7 @@
 
 #include "ConfigCarte.h"
 
-ServoTimer2   ServoMoteur;
+ServoTimer2   Servo;
 
 char message[TAILLE_MAX_SERIAL_MESSAGE];
 bool nouveauMessageDisponible = true;
@@ -31,8 +31,8 @@ int getMaxServoDroite() {
     return maxAngleServo;
 }
 
-int getAdresseAiguillage() {
-    int maxAngleServo = 0;
+uint16_t getAdresseAiguillage() {
+    uint16_t maxAngleServo = 0;
     EEPROM.get(ADRESSE_MEMOIRE_ADRESSE_AIGUILLAGE, maxAngleServo);
 
     return maxAngleServo;
@@ -73,10 +73,10 @@ void menuReglage() {
     Serial.println("Paramettre Carte :");
     Serial.println("");
 
-    Serial.print("Carte Issolée : ");
+    Serial.print("Carte Issolee : ");
 
     if (!getIssolementCarte()) {
-        Serial.println("Issolée");
+        Serial.println("Issolee");
         Serial.println("");
     } else {
         Serial.println("En Service");
@@ -114,19 +114,19 @@ void menuHelp() {
     Serial.print(MENU_REGLAGE);
     Serial.println(" : voire les reglage");
     Serial.print(MENU_REGLAGE_POINT_MILLIEU);
-    Serial.println(" : Réglage point millieu servo moteur");
+    Serial.println(" : Reglage point millieu servo moteur");
     Serial.print(MENU_REGLAGE_GAUCHE_DROITE);
-    Serial.println(" : Réglage fin de course gauche / droite");
+    Serial.println(" : Reglage fin de course gauche / droite");
     Serial.print(MENU_REGLAGE_ADRESSE_AIGUILLAGE);
-    Serial.println(" : Réglage adresse commande aiguillage");
+    Serial.println(" : Reglage adresse commande aiguillage");
     Serial.print(MENU_REGLAGE_ADRESSE_DETECTION);
-    Serial.println(" : Réglage adresse detection");
+    Serial.println(" : Reglage adresse detection");
     Serial.print(MENU_REGLAGE_NOMBRE_AIGUILLAGE);
-    Serial.println(" : Réglage nombre de moteur aiguillage");
+    Serial.println(" : Reglage nombre de moteur aiguillage");
     Serial.print(MENU_REGLAGE_ISSOLEMENT);
     Serial.println(" : Issolement carte");
     Serial.print(MENU_EXIT_MODE_CONFIGURATION);
-    Serial.println(" : Quité le mode configuration");
+    Serial.println(" : Quite le mode configuration");
     Serial.print(MENU_HELP);
     Serial.println(" : Commande help");
     Serial.println("");
@@ -135,7 +135,7 @@ void menuHelp() {
 
 void menuExploitation() {
 
-    Serial.println("Entrée 'C' pour passer en mode configuration : ");
+    Serial.println("Entree 'C' pour passer en mode configuration : ");
     if (strstr(message, MENU_MODE_CONFIGURATION)) {
         menuConfiguration = accueil;
         purgeMessage();
@@ -223,16 +223,16 @@ void menuReglageAdresseAiguillage() {
             EEPROM.put(ADRESSE_MEMOIRE_ADRESSE_AIGUILLAGE, adresse);
             adresseConfigure = true;
         } else {
-            Serial.println("Entrée une adresse entre 0 et 2048 : ");
+            Serial.println("Entree une adresse entre 0 et 2048 : ");
             return;
         }
 
         Serial.println("");
-        Serial.print("Nouvelle adresse configuré : "); Serial.println(adresse);
+        Serial.print("Nouvelle adresse configure : "); Serial.println(adresse);
 
     }
 
-    Serial.println("Entrée 'E' pour quitée : ");
+    Serial.println("Entree 'E' pour quitee : ");
 
     if (strstr(message, MENU_EXIT_MODE_CONFIGURATION)) {
         adresseConfigure = false;
@@ -265,7 +265,7 @@ void menuReglageAdresseDetection() {
                 memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
             } else {
                 Serial.print("Detect 1 : ");
-                Serial.println("Entrée une adresse entre 0 et 2048 : ");
+                Serial.println("Entree une adresse entre 0 et 2048 : ");
                 return;
             }
         }
@@ -277,7 +277,7 @@ void menuReglageAdresseDetection() {
                 adresseDetecteur2 = true;
             } else {
                 Serial.print("Detect 2 : ");
-                Serial.println("Entrée une adresse entre 0 et 2048 : ");
+                Serial.println("Entree une adresse entre 0 et 2048 : ");
                 return;
             }
         }
@@ -288,13 +288,13 @@ void menuReglageAdresseDetection() {
 
     Serial.println("");
     Serial.println("Detecteur 1");
-    Serial.print("Nouvelle adresse configuré : "); Serial.println(adresse1);
+    Serial.print("Nouvelle adresse configure : "); Serial.println(adresse1);
     Serial.println("");
     Serial.println("Detecteur 2");
-    Serial.print("Nouvelle adresse configuré : "); Serial.println(adresse2);
+    Serial.print("Nouvelle adresse configure : "); Serial.println(adresse2);
     Serial.println("");
 
-    Serial.println("Entrée 'E' pour quitter : ");
+    Serial.println("Entree 'E' pour quitter : ");
 
     if (strstr(message, MENU_EXIT_MODE_CONFIGURATION)) {
         adresseConfigure = false;
@@ -321,19 +321,19 @@ void menuReglageGaucheDroite() {
     Serial.println("");
 
     Serial.println("");
-    Serial.println("Entrée '+' pour ajouter de l'angle");
-    Serial.println("Entrée '-' pour retirée de l'angle");
-    Serial.println("Entrée 'D' pour la configuration par défault (moteur decapod)");
-    Serial.println("Entrée 'V' pour validée");
+    Serial.println("Entree '+' pour ajouter de l'angle");
+    Serial.println("Entree '-' pour retiree de l'angle");
+    Serial.println("Entree 'D' pour la configuration par default (moteur decapod)");
+    Serial.println("Entree 'V' pour validee");
     Serial.println(""); Serial.println("");
 
-    ServoMoteur.attach(PIN_SERVO);
+    Servo.attach(PIN_SERVO);
 
     if (!servo) {
 
         if (!gauche) {
 
-            ServoMoteur.write(angleGauche);
+            Servo.write(angleGauche);
 
             if (strstr(message, "+")) {
 
@@ -367,7 +367,7 @@ void menuReglageGaucheDroite() {
 
         if (!droite) {
 
-            ServoMoteur.write(angleDroite);
+            Servo.write(angleDroite);
 
             if (strstr(message, "+")) {
 
@@ -409,9 +409,9 @@ void menuReglageGaucheDroite() {
     Serial.print("Angle droite : "); Serial.println(angleDroite);
     Serial.println("");
 
-    ServoMoteur.detach();
+    Servo.detach();
 
-    Serial.println("Entrée 'E' pour quitter : ");
+    Serial.println("Entree 'E' pour quitter : ");
 
     if (strstr(message, MENU_EXIT_MODE_CONFIGURATION)) {
         servo = false;
@@ -432,8 +432,8 @@ void menuReglageIssolement() {
     if (!parametres) {
 
         Serial.println("");
-        Serial.println("Entrée 'C' pour changé d'état");
-        Serial.println("Entrée 'V' pour validée");
+        Serial.println("Entree 'C' pour change d'etat");
+        Serial.println("Entree 'V' pour validee");
         Serial.println(""); Serial.println("");
 
         if (strstr(message, "C")) {
@@ -441,7 +441,7 @@ void menuReglageIssolement() {
             isolementCarte = !isolementCarte;
 
             if (!isolementCarte) {
-                Serial.println("CARTE ISOLÉE");
+                Serial.println("CARTE ISOLeE");
             } else {
                 Serial.println("CARTE EN SERVICE");
             }
@@ -453,7 +453,7 @@ void menuReglageIssolement() {
         if (strstr(message, "V")) {
 
             EEPROM.put(ADRESSE_MEMOIRE_CARTE_ISOLEE, isolementCarte);
-            Serial.println("Paramettre enregistrés");
+            Serial.println("Paramettre enregistres");
             memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
 
             parametres = true;
@@ -463,7 +463,7 @@ void menuReglageIssolement() {
         return;
     }
 
-    Serial.println("Entrée 'E' pour quitée : ");
+    Serial.println("Entree 'E' pour quitee : ");
 
     if (strstr(message, MENU_EXIT_MODE_CONFIGURATION)) {
         menuConfiguration = accueil;
@@ -476,18 +476,18 @@ void menuReglageIssolement() {
 void menuReglagePointMillieu() {
     
     Serial.print("\x1b[2J\x1b[;H");
-    ServoMoteur.attach(PIN_SERVO);
+    Servo.attach(PIN_SERVO);
 
     Serial.println("");
     Serial.println("");
     Serial.println("REGLAGE POINT MILLIEU...");
-    Serial.println("Entrée 'E' pour quitée : ");
+    Serial.println("Entree 'E' pour quitee : ");
 
-    ServoMoteur.write(POINT_MILLIEU_SERVO);
+    Servo.write(POINT_MILLIEU_SERVO);
 
     if (strstr(message, MENU_EXIT_MODE_CONFIGURATION)) {
         menuConfiguration = accueil;
-        ServoMoteur.detach();
+        Servo.detach();
         purgeMessage();
     }
 }
@@ -508,16 +508,16 @@ void menuReglageNombreAiguillage() {
             EEPROM.put(ADRESSE_MEMOIRE_NOMBRE_MOTEUR, adresse);
             adresseConfigure = true;
         } else {
-            Serial.println("Entrée le nombre de moteur entre 1 et 2 : ");
+            Serial.println("Entree le nombre de moteur entre 1 et 2 : ");
             return;
         }
 
         Serial.println("");
-        Serial.print("nombre de moteur configurée : "); Serial.println(adresse);
+        Serial.print("nombre de moteur configuree : "); Serial.println(adresse);
 
     }
 
-    Serial.println("Entrée 'E' pour quitée : ");
+    Serial.println("Entree 'E' pour quitee : ");
 
     if (strstr(message, MENU_EXIT_MODE_CONFIGURATION)) {
         adresseConfigure = false;
@@ -567,7 +567,7 @@ void prossesMenu() {
                 break;
         }
 
-        nouveauMessageDisponible = false; // Réinitialiser le flag
+        nouveauMessageDisponible = false; // Reinitialiser le flag
     }
 
 }

@@ -1,67 +1,68 @@
-// #include <Arduino.h>
-// #include <ServoTimer2.h>
-// #include "GestionAiguillage.h"
+#include <Arduino.h>
+#include <ServoTimer2.h>
+#include <ConfigCarte.h>
+#include "GestionAiguillage.h"
 
-// ServoTimer2   ServoMoteur;
+ServoTimer2   ServoMoteur;
 
-// void setServo(int state) {
-//   int targetPosition = (state == TURNOUT_NORMAL) ? SERVO_VALL_NORMAL : SERVO_VALL_TURNOUT;
+void setServo(bool etatPossitionAiguillage, uint8_t pinServo) {
 
-//   int currentPosition = ServoMoteur.read();
-//   unsigned long previousMillis = millis();
+    ServoMoteur.attach(pinServo);
 
-//   while (currentPosition != targetPosition) {
-//     unsigned long currentMillis = millis();
+    int targetPosition = (etatPossitionAiguillage == 0) ? getMaxServoDroite() : getMaxServoGauche();
 
-//     if (currentMillis - previousMillis >= 1) {
-//       previousMillis = currentMillis;
+    int currentPosition = ServoMoteur.read();
+    unsigned long previousMillis = millis();
 
-//       currentPosition = (currentPosition < targetPosition) ? currentPosition + 1 : currentPosition - 1;
-//       ServoMoteur.write(currentPosition);
-//     }
-//   }
-// }
+    while (currentPosition != targetPosition) {
+        unsigned long currentMillis = millis();
 
-// void handleTurnoutPosition() {
-//   if (etatPossitionAiguillage != old_etatPossitionAiguillage) {
-//     old_etatPossitionAiguillage = etatPossitionAiguillage;
-//     digitalWrite(RELAI_PIN, etatPossitionAiguillage);
-//     ServoMoteur.attach(SERVO_PIN);
-//     setServo(etatPossitionAiguillage);
-//     ServoMoteur.detach();
-//     Serial.print("Changement Etat aiguillage : ");
-//     Serial.println(etatPossitionAiguillage);
-//   }
-// }
+        if (currentMillis - previousMillis >= 1) {
 
+            currentPosition = (currentPosition < targetPosition) ? currentPosition + 1 : currentPosition - 1;
+            ServoMoteur.write(currentPosition);
 
-// void notifyButtonState(int buttonPin, int sensorAddress, const char *sensorName) {
-//   bool &didStatus = (buttonPin == N_BUTTON_PIN) ? didStatusN : didStatusD;
-//   bool &oldDidStatus = (buttonPin == N_BUTTON_PIN) ? oldDidStatusN : oldDidStatusD;
-//   unsigned long &lastDebounceTime = (buttonPin == N_BUTTON_PIN) ? lastDebounceTimeN : lastDebounceTimeD;
-//   unsigned long &debounceDelay = (buttonPin == N_BUTTON_PIN) ? debounceDelayN : debounceDelayD;
+            previousMillis = currentMillis;
+        }
+    }
 
-//   int reading = digitalRead(buttonPin);
+    ServoMoteur.detach();
+}
 
-//   if (reading != oldDidStatus) {
-//     lastDebounceTime = millis();
-//   }
+void changementPossition(uint8_t pinServo, uint8_t pinRelais, bool etatPossitionAiguillage) {
 
-//   if ((millis() - lastDebounceTime) >= debounceDelay) {
-//     if (reading != didStatus) {
-//       didStatus = reading;
-//       LocoNet.reportSensor(sensorAddress, reading);
-//       Serial.print("Changement Etat ");
-//       Serial.print(sensorName);
-//       Serial.print(" : ");
-//       Serial.println(reading);
-//     }
-//   }
+    static bool old_etatPossitionAiguillage;
 
-//   oldDidStatus = reading;
-// }
+    if (etatPossitionAiguillage != old_etatPossitionAiguillage) {
 
-// void notifyButtonStates() {
-//   notifyButtonState(N_BUTTON_PIN, ADRESSE_SENSOR1, "Sensor 1");
-//   notifyButtonState(D_BUTTON_PIN, ADRESSE_SENSOR2, "Sensor 2");
-// }
+        digitalWrite(pinRelais, etatPossitionAiguillage);
+        setServo(etatPossitionAiguillage, pinServo);
+
+        old_etatPossitionAiguillage = etatPossitionAiguillage;
+    }
+
+}
+
+bool getDetection1(uint8_t pinBouton) {
+    bool etatBouton = digitalRead(pinBouton);
+    static bool old_etatBouton = false;
+
+    if (old_etatBouton != etatBouton) {
+        old_etatBouton = etatBouton;
+        if (etatBouton) return true;
+    }
+
+    return false;
+}
+
+bool getDetection2(uint8_t pinBouton) {
+    bool etatBouton = digitalRead(pinBouton);
+    static bool old_etatBouton = false;
+
+    if (old_etatBouton != etatBouton) {
+        old_etatBouton = etatBouton;
+        if (etatBouton) return true;
+    }
+
+    return false;
+}
