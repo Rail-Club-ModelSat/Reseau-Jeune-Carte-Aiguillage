@@ -7,6 +7,12 @@
 
 lnMsg        *LnPacket;
 
+
+/**
+ * Fonction : setup
+ * ----------------
+ * Initialise le système, configure les broches et affiche les informations de démarrage sur le moniteur série.
+ */
 void setup() {
   LocoNet.init();
 
@@ -34,6 +40,12 @@ void setup() {
 
 }
 
+
+/**
+ * Fonction : serialEvent
+ * ----------------------
+ * Traite les événements série en lisant les caractères entrants tant qu'ils sont disponibles.
+ */
 void serialEvent() {
 
   boolean messageEnCours = true;
@@ -47,6 +59,12 @@ void serialEvent() {
 
 }
 
+
+/**
+ * Fonction : loconetMessage
+ * -------------------------
+ * Réceptionne et traite les messages Loconet reçus.
+ */
 void loconetMessage() {
 
   LnPacket = LocoNet.receive();
@@ -57,6 +75,12 @@ void loconetMessage() {
 
 }
 
+
+/**
+ * Fonction : getDetection
+ * -----------------------
+ * Vérifie l'état de détection des entrées et envoie des rapports de capteur Loconet selon l'état de détection.
+ */
 void getDetection() {
 
   bool etatDetection1 = getDetection1(PIN_BOUTON_DETECT1);
@@ -73,11 +97,25 @@ void getDetection() {
 
 }
 
+
+/**
+ * Fonction : getEtatSensLogique
+ * -----------------------------
+ * Calcule l'état logique actuel basé sur le sens et la position de l'aiguillage.
+ *
+ * @return bool : L'état logique calculé.
+ */
 bool getEtatSensLogique() {
   bool etatSensLogique = getSensLogique() ^ etatPossitionAiguillage;
   return etatSensLogique;
 }
 
+
+/**
+ * Fonction : gestionLedErreur
+ * ---------------------------
+ * Gère l'état de la LED d'erreur en fonction de l'état d'isolation de la carte et de l'alimentation DCC.
+ */
 void gestionLedErreur() {
 
   if (!getIssolementCarte()) {
@@ -107,6 +145,12 @@ void gestionLedErreur() {
   
 }
 
+
+/**
+ * Fonction : newData
+ * ------------------
+ * Gère l'indication visuelle des nouvelles données Loconet à l'aide d'une LED.
+ */
 void newData() {
   if (newLoconetData) {
     static long currentTime = 0;
@@ -126,6 +170,12 @@ void newData() {
   
 }
 
+
+/**
+ * Fonction : dispatch
+ * -------------------
+ * Dispatch gère différentes fonctions de contrôle, y compris la gestion de menu, des LEDs, et des messages Loconet.
+ */
 void dispatch() {
 
   prossesMenu();
@@ -141,25 +191,69 @@ void dispatch() {
 
 }
 
+
+/**
+ * Fonction : loop
+ * ---------------
+ * Boucle principale du programme
+ */
 void loop() {
   dispatch();
 }
 
+
+/**
+ * Fonction : notifySwitchRequest
+ * ------------------------------
+ * Notifie une requête de commutation d'aiguillage et met à jour l'état de position.
+ *
+ * @param Address    Adresse de l'aiguillage.
+ * @param Output     Sortie contrôlée.
+ * @param Direction  Direction de la commutation.
+ */
 void notifySwitchRequest( uint16_t Address, uint8_t Output, uint8_t Direction ) { 
   if (Address == getAdresseAiguillage()) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } 
   newLoconetData = true;
 }
 
+
+/**
+ * Fonction : notifySwitchReport
+ * -----------------------------
+ * Notifie un rapport de commutation d'aiguillage et met à jour l'état de position.
+ *
+ * @param Address    Adresse de l'aiguillage.
+ * @param Output     Sortie contrôlée.
+ * @param Direction  Direction de la commutation.
+ */
 void notifySwitchReport( uint16_t Address, uint8_t Output, uint8_t Direction ) { 
   if (Address == getAdresseAiguillage()) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } 
   newLoconetData = true;  
 }
 
+
+/**
+ * Fonction : notifySwitchState
+ * ----------------------------
+ * Notifie l'état de commutation d'aiguillage et met à jour l'état de position.
+ *
+ * @param Address    Adresse de l'aiguillage.
+ * @param Output     Sortie contrôlée.
+ * @param Direction  Direction de la commutation.
+ */
 void notifySwitchState( uint16_t Address, uint8_t Output, uint8_t Direction ) { 
   if (Address == getAdresseAiguillage()) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } 
   newLoconetData = true;
 }
 
+
+/**
+ * Fonction : notifyPower
+ * ----------------------
+ * Notifie l'état de l'alimentation DCC et met à jour l'état des données Loconet.
+ *
+ * @param State    État de l'alimentation DCC.
+ */
 void notifyPower(uint8_t State) {
   etatPowerDCC = State;
   newLoconetData = true;

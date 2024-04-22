@@ -10,6 +10,12 @@ ServoTimer2   Servo;
 char message[TAILLE_MAX_SERIAL_MESSAGE];
 bool nouveauMessageDisponible = true;
 
+
+/**
+ * Fonction : purgeMessage
+ * -----------------------
+ * Réinitialise le message reçu, efface l'affichage du terminal et marque un nouveau message comme disponible.
+ */
 void purgeMessage() {
     memset(message, 0, TAILLE_MAX_SERIAL_MESSAGE);
     Serial.print(F("\x1b[2J\x1b[;H"));
@@ -17,6 +23,14 @@ void purgeMessage() {
     prossesMenu();
 }
 
+
+/**
+ * Fonction : getMaxServoGauche
+ * ----------------------------
+ * Lit et retourne l'angle maximal pour la position gauche du servo depuis l'EEPROM.
+ *
+ * @return uint16_t : Angle maximal pour le servo à gauche.
+ */
 uint16_t getMaxServoGauche() {
     uint16_t maxAngleServo = 0;
     EEPROM.get(ADRESSE_MEMOIRE_ANGLE_GAUCHE, maxAngleServo);
@@ -24,6 +38,14 @@ uint16_t getMaxServoGauche() {
     return maxAngleServo;
 }
 
+
+/**
+ * Fonction : getMaxServoDroite
+ * ----------------------------
+ * Lit et retourne l'angle maximal pour la position droite du servo depuis l'EEPROM.
+ *
+ * @return uint16_t : Angle maximal pour le servo à droite.
+ */
 uint16_t getMaxServoDroite() {
     uint16_t maxAngleServo = 0;
     EEPROM.get(ADRESSE_MEMOIRE_ANGLE_DROITE, maxAngleServo);
@@ -31,6 +53,14 @@ uint16_t getMaxServoDroite() {
     return maxAngleServo;
 }
 
+
+/**
+ * Fonction : getAdresseAiguillage
+ * -------------------------------
+ * Lit et retourne l'adresse de l'aiguillage stockée dans l'EEPROM.
+ *
+ * @return uint16_t : Adresse de l'aiguillage.
+ */
 uint16_t getAdresseAiguillage() {
     uint16_t maxAngleServo = 0;
     EEPROM.get(ADRESSE_MEMOIRE_ADRESSE_AIGUILLAGE, maxAngleServo);
@@ -38,6 +68,14 @@ uint16_t getAdresseAiguillage() {
     return maxAngleServo;
 }
 
+
+/**
+ * Fonction : getAdresseDetecteur1
+ * -------------------------------
+ * Lit et retourne l'adresse du premier détecteur stockée dans l'EEPROM.
+ *
+ * @return uint16_t : Adresse du détecteur 1.
+ */
 uint16_t getAdresseDetecteur1() {
     uint16_t maxAngleServo = 0;
     EEPROM.get(ADRESSE_MEMOIRE_ADRESSE_DETECTION1, maxAngleServo);
@@ -45,6 +83,14 @@ uint16_t getAdresseDetecteur1() {
     return maxAngleServo;
 }
 
+
+/**
+ * Fonction : getAdresseDetecteur2
+ * -------------------------------
+ * Lit et retourne l'adresse du second détecteur stockée dans l'EEPROM.
+ *
+ * @return uint16_t : Adresse du détecteur 2.
+ */
 uint16_t getAdresseDetecteur2() {
     uint16_t maxAngleServo = 0;
     EEPROM.get(ADRESSE_MEMOIRE_ADRESSE_DETECTION2, maxAngleServo);
@@ -52,6 +98,14 @@ uint16_t getAdresseDetecteur2() {
     return maxAngleServo;
 }
 
+
+/**
+ * Fonction : getNombreAiguillage
+ * ------------------------------
+ * Lit et retourne le nombre d'aiguillages configurés depuis l'EEPROM.
+ *
+ * @return uint8_t : Nombre d'aiguillages configurés.
+ */
 uint8_t getNombreAiguillage() {
     uint8_t maxAngleServo = 0;
     EEPROM.get(ADRESSE_MEMOIRE_NOMBRE_MOTEUR, maxAngleServo);
@@ -59,6 +113,14 @@ uint8_t getNombreAiguillage() {
     return maxAngleServo;
 }
 
+
+/**
+ * Fonction : getIssolementCarte
+ * -----------------------------
+ * Lit et retourne l'état d'isolement de la carte depuis l'EEPROM.
+ *
+ * @return bool : État d'isolement de la carte (true si isolée).
+ */
 bool getIssolementCarte() {
     bool maxAngleServo;
     EEPROM.get(ADRESSE_MEMOIRE_CARTE_ISOLEE, maxAngleServo);
@@ -66,6 +128,14 @@ bool getIssolementCarte() {
     return maxAngleServo;
 }
 
+
+/**
+ * Fonction : getSensLogique
+ * -------------------------
+ * Lit et retourne le sens logique du moteur depuis l'EEPROM.
+ *
+ * @return bool : Sens logique du moteur.
+ */
 bool getSensLogique() {
     bool maxAngleServo;
     EEPROM.get(ADRESSE_MEMOIRE_SENS_LOGIQUE, maxAngleServo);
@@ -73,6 +143,12 @@ bool getSensLogique() {
     return maxAngleServo;
 }
 
+
+/**
+ * Fonction : menuReglage
+ * ----------------------
+ * Affiche les paramètres actuels de la carte.
+ */
 void menuReglage() {
 
     Serial.println(F(""));
@@ -118,6 +194,12 @@ void menuReglage() {
 
 }
 
+
+/**
+ * Fonction : menuHelp
+ * -------------------
+ * Affiche les options disponibles dans le menu d'aide.
+ */
 void menuHelp() {
 
     Serial.println(F(""));
@@ -147,6 +229,12 @@ void menuHelp() {
 
 }
 
+
+/**
+ * Fonction : menuExploitation
+ * ---------------------------
+ * Gère le mode d'exploitation et permet de basculer en mode de configuration.
+ */
 void menuExploitation() {
 
     Serial.println(F("Entree 'C' pour passer en mode configuration : "));
@@ -157,6 +245,12 @@ void menuExploitation() {
 
 }
 
+
+/**
+ * Fonction : menuAccueil
+ * ----------------------
+ * Gère le menu principal et traite les commandes entrées par l'utilisateur.
+ */
 void menuAccueil() {
 
     if (strstr(message, MENU_HELP)) {
@@ -226,6 +320,12 @@ void menuAccueil() {
 
 }
 
+
+/**
+ * Fonction : menuReglageAdresseAiguillage
+ * ---------------------------------------
+ * Permet à l'utilisateur de configurer l'adresse de commande de l'aiguillage.
+ */
 void menuReglageAdresseAiguillage() {
 
     Serial.print(F("\x1b[2J\x1b[;H"));
@@ -261,6 +361,12 @@ void menuReglageAdresseAiguillage() {
 
 }
 
+
+/**
+ * Fonction : menuReglageAdresseDetection
+ * --------------------------------------
+ * Permet à l'utilisateur de configurer les adresses des détecteurs.
+ */
 void menuReglageAdresseDetection() {
 
     Serial.print(F("\x1b[2J\x1b[;H"));
@@ -325,6 +431,12 @@ void menuReglageAdresseDetection() {
 
 }
 
+
+/**
+ * Fonction : menuReglageGaucheDroite
+ * ----------------------------------
+ * Permet à l'utilisateur de régler les positions gauche et droite du servo.
+ */
 void menuReglageGaucheDroite() {
 
     Serial.print(F("\x1b[2J\x1b[;H"));
@@ -441,6 +553,12 @@ void menuReglageGaucheDroite() {
     }
 }
 
+
+/**
+ * Fonction : menuReglageIssolement
+ * --------------------------------
+ * Permet à l'utilisateur de changer l'état d'isolement de la carte.
+ */
 void menuReglageIssolement() {
 
     Serial.print(F("\x1b[2J\x1b[;H"));
@@ -492,6 +610,12 @@ void menuReglageIssolement() {
     
 }
 
+
+/**
+ * Fonction : menuReglageSensLogique
+ * ---------------------------------
+ * Permet à l'utilisateur de changer le sens logique du moteur.
+ */
 void menuReglageSensLogique() {
 
     Serial.print(F("\x1b[2J\x1b[;H"));
@@ -543,6 +667,12 @@ void menuReglageSensLogique() {
     
 }
 
+
+/**
+ * Fonction : menuReglagePointMillieu
+ * ----------------------------------
+ * Permet à l'utilisateur de régler le point milieu du servo.
+ */
 void menuReglagePointMillieu() {
     
     Serial.print(F("\x1b[2J\x1b[;H"));
@@ -562,6 +692,12 @@ void menuReglagePointMillieu() {
     }
 }
 
+
+/**
+ * Fonction : menuReglageNombreAiguillage
+ * --------------------------------------
+ * Permet à l'utilisateur de configurer le nombre de moteurs d'aiguillage.
+ */
 void menuReglageNombreAiguillage() {
 
     Serial.print(F("\x1b[2J\x1b[;H"));
@@ -596,6 +732,12 @@ void menuReglageNombreAiguillage() {
     }
 }
 
+
+/**
+ * Fonction : prossesMenu
+ * ----------------------
+ * Traite le menu en cours basé sur le message reçu et le nouvel état de disponibilité du message.
+ */
 void prossesMenu() {
 
     if (nouveauMessageDisponible) {
@@ -646,6 +788,15 @@ void prossesMenu() {
 
 }
 
+
+/**
+ * Fonction : getCarathere
+ * -----------------------
+ * Gère la réception des caractères entrants sur le port série.
+ *
+ * @param lectureCarathere  Caractère lu du port série.
+ * @return bool : Indique si la lecture est toujours en cours.
+ */
 bool getCarathere(char lectureCarathere) {
     static byte indexMessage = 0;
     boolean messageEnCours = true;
