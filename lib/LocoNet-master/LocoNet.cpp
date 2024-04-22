@@ -396,6 +396,11 @@ uint8_t LocoNetClass::processSwitchSensorMessage(lnMsg* LnPacket)
 			notifyPower(1);
 		break;
 
+	case OPC_GPOFFZ21:
+		if (notifyPower)
+			notifyPower(0);
+		break;
+
 	case OPC_GPOFF:
 		if (notifyPower)
 			notifyPower(0);
