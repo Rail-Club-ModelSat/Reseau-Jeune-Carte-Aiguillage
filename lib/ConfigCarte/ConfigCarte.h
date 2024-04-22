@@ -11,19 +11,18 @@
 #define MENU_REGLAGE_ISSOLEMENT                     "I"   // I
 #define MENU_MODE_CONFIGURATION                     "C"   // C
 #define MENU_EXIT_MODE_CONFIGURATION                "E"   // E
+#define MENU_REGLAGE_SENS_LOGIQUE                   "S"   // S
 #define MENU_REGLAGE                                "R"   // R
 #define MENU_HELP                                   "?"   // ?
 
-#define ADRESSE_MEMOIRE_ADRESSE_AIGUILLAGE          1000
-#define ADRESSE_MEMOIRE_ADRESSE_DETECTION1          1500
-#define ADRESSE_MEMOIRE_ADRESSE_DETECTION2          1600
-
-#define ADRESSE_MEMOIRE_ANGLE_GAUCHE                1700
-#define ADRESSE_MEMOIRE_ANGLE_DROITE                1800
-
-#define ADRESSE_MEMOIRE_CARTE_ISOLEE                2100
-
-#define ADRESSE_MEMOIRE_NOMBRE_MOTEUR               2200
+#define ADRESSE_MEMOIRE_ADRESSE_AIGUILLAGE          5000
+#define ADRESSE_MEMOIRE_ADRESSE_DETECTION1          5100
+#define ADRESSE_MEMOIRE_ADRESSE_DETECTION2          5200
+#define ADRESSE_MEMOIRE_ANGLE_GAUCHE                5300
+#define ADRESSE_MEMOIRE_ANGLE_DROITE                5400
+#define ADRESSE_MEMOIRE_CARTE_ISOLEE                5500
+#define ADRESSE_MEMOIRE_NOMBRE_MOTEUR               5600
+#define ADRESSE_MEMOIRE_SENS_LOGIQUE                5700
 
 #define DEFAULT_SERVO_MAX_GAUCHE                    1050
 #define DEFAULT_SERVO_MAX_DROITE                    1800
@@ -31,17 +30,18 @@
 
 #define TAILLE_MAX_SERIAL_MESSAGE 10
 
-enum { exploitation, accueil, reglageAdresseAiguillage, reglageAdresseDetection, reglageGaucheDroite, reglageIssolement, reglageNombreAiguillage, reglagePointMillieu } menuConfiguration;
+enum { exploitation, accueil, reglageSensLogique, reglageAdresseAiguillage, reglageAdresseDetection, reglageGaucheDroite, reglageIssolement, reglageNombreAiguillage, reglagePointMillieu } menuConfiguration;
 
 bool getCarathere(char lectureCarathere);
 void prossesMenu();
 
-int getMaxServoGauche();
-int getMaxServoDroite();
+uint16_t getMaxServoGauche();
+uint16_t getMaxServoDroite();
 uint16_t getAdresseAiguillage();
-int getAdresseDetecteur1();
-int getAdresseDetecteur2();
-int getNombreAiguillage();
+uint16_t getAdresseDetecteur1();
+uint16_t getAdresseDetecteur2();
+uint8_t getNombreAiguillage();
 bool getIssolementCarte();
+bool getSensLogique();
 
 #endif // ConfigCarte_h

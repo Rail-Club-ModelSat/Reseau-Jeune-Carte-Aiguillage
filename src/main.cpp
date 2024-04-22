@@ -19,15 +19,18 @@ void setup() {
   pinMode(PIN_LED_ERREUR, OUTPUT);
 
   Serial.begin(VITESSE_TRAMSMISSION);
-  Serial.println("");Serial.println("");
-  Serial.println("Rail Club ModelSat - Carte Loconet Arduino");
-  Serial.println("Par MARTIN Mathis - V1.0.0");
-  Serial.println("");Serial.println("");Serial.println("");
+  Serial.println(F("")); Serial.println(F(""));
+  Serial.println(F("Rail Club ModelSat - Carte Loconet Arduino"));
+  Serial.println(F("Par MARTIN Mathis - V1.0.0"));
+  Serial.println(F("")); Serial.println(F("")); Serial.println(F(""));
 
   if (!getIssolementCarte()) {
-    Serial.println("/!\\ CARTE ISSOLER /!\\");
-    Serial.println("");
+    Serial.println(F("/!\\ CARTE ISSOLER /!\\"));
+    Serial.println(F(""));
   }
+
+  digitalWrite(PIN_LED_DATA, HIGH);
+  digitalWrite(PIN_LED_POSSITION_AIGUIL, HIGH);
 
 }
 
@@ -37,7 +40,7 @@ void serialEvent() {
 
   while (Serial.available() && messageEnCours) {
 
-    int lectureCarathere = Serial.read();
+    char lectureCarathere = Serial.read();
     messageEnCours = getCarathere(lectureCarathere);
 
   }
@@ -45,29 +48,11 @@ void serialEvent() {
 }
 
 void loconetMessage() {
-  
+
   LnPacket = LocoNet.receive();
 
   if (LnPacket) {
-    
-    Serial.print("RX: ");
-    uint8_t msgLen = getLnMsgSize(LnPacket);
-
-    for (uint8_t x = 0; x < msgLen; x++) {
-
-      uint8_t val = LnPacket->data[x];
-      
-      if (val < 16) Serial.print('0');
-
-      Serial.print(val, HEX);
-      Serial.print(' ');
-
-    }
-
-    if (!LocoNet.processSwitchSensorMessage(LnPacket)) {
-      Serial.println();
-    }
-
+    LocoNet.processSwitchSensorMessage(LnPacket);
   }
 
 }
@@ -81,43 +66,101 @@ void getDetection() {
     LocoNet.reportSensor(getAdresseDetecteur1(), etatDetection1);
   }
 
-  if (etatDetection2) {
+
+  if (etatDetection2 && getNombreAiguillage() == 2) {
     LocoNet.reportSensor(getAdresseDetecteur1(), etatDetection2);
   }
 
 }
 
+bool getEtatSensLogique() {
+  bool etatSensLogique = getSensLogique() ^ etatPossitionAiguillage;
+  return etatSensLogique;
+}
+
+void gestionLedErreur() {
+
+  if (!getIssolementCarte()) {
+
+    digitalWrite(PIN_LED_ERREUR, LOW);
+
+  } else if (!etatPowerDCC) {
+
+    static long currentTime = 0;
+    static unsigned long previousTime = 0;
+    static bool etatLedErreur = true;
+
+    currentTime = millis();
+    if((currentTime - previousTime) > 600){
+
+      digitalWrite(PIN_LED_ERREUR, etatLedErreur);
+      newLoconetData = false;
+
+      etatLedErreur = !etatLedErreur;
+
+      previousTime = currentTime;
+    }
+
+  } else {
+    digitalWrite(PIN_LED_ERREUR, HIGH);
+  }
+  
+}
+
+void newData() {
+  if (newLoconetData) {
+    static long currentTime = 0;
+    static unsigned long previousTime = 0;
+
+    digitalWrite(PIN_LED_DATA, LOW);
+
+    currentTime = millis();
+    if((currentTime - previousTime) > 300){
+
+      digitalWrite(PIN_LED_DATA, HIGH);
+      newLoconetData = false;
+
+      previousTime = currentTime;
+    }
+  }
+  
+}
+
 void dispatch() {
+
   prossesMenu();
+  gestionLedErreur();
+  newData();
 
   if (getIssolementCarte() && menuConfiguration == exploitation) {
     loconetMessage();
-    changementPossition(PIN_SERVO, PIN_RELAIS, etatPossitionAiguillage);
+    changementPossition(PIN_SERVO, PIN_RELAIS, getEtatSensLogique());
+    digitalWrite(PIN_LED_POSSITION_AIGUIL, !etatPossitionAiguillage);
     getDetection();
   }
+
 }
 
 void loop() {
   dispatch();
 }
 
-void notifySwitchRequest( uint16_t Address, uint8_t Output, uint8_t Direction )
-{ 
+void notifySwitchRequest( uint16_t Address, uint8_t Output, uint8_t Direction ) { 
   if (Address == getAdresseAiguillage()) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } 
-
-  Serial.print("Switch Request: ");
-  Serial.print(Address, DEC);
-  Serial.print(':');
-  Serial.print(Direction ? "Closed" : "Thrown");
-  Serial.print(" - ");
-  Serial.println(Output ? "On" : "Off");
-
+  newLoconetData = true;
 }
 
-void notifySwitchReport( uint16_t Address, uint8_t Output, uint8_t Direction )
-{ if (Address == getAdresseAiguillage()) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } }
+void notifySwitchReport( uint16_t Address, uint8_t Output, uint8_t Direction ) { 
+  if (Address == getAdresseAiguillage()) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } 
+  newLoconetData = true;  
+}
 
-void notifySwitchState( uint16_t Address, uint8_t Output, uint8_t Direction )
-{ if (Address == getAdresseAiguillage()) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } }
+void notifySwitchState( uint16_t Address, uint8_t Output, uint8_t Direction ) { 
+  if (Address == getAdresseAiguillage()) { etatPossitionAiguillage = ((Direction & 0x20) >> 5); } 
+  newLoconetData = true;
+}
 
-void notifyPower(uint8_t State) { etatPowerDCC = State; }
+void notifyPower(uint8_t State) {
+  etatPowerDCC = State;
+  newLoconetData = true;
+}

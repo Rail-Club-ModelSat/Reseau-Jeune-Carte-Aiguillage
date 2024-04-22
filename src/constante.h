@@ -12,11 +12,11 @@
 #define PIN_LED_DATA                17
 #define PIN_LED_ERREUR              18
 
-bool etatPowerDCC;
-
 enum TurnoutState {
   TURNOUT_NORMAL = 1,
   TURNOUT_DIVERGING = 0
 };
 
+bool etatPowerDCC = true;
 bool etatPossitionAiguillage;
+bool newLoconetData = false;

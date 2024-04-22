@@ -9,9 +9,9 @@ void setServo(bool etatPossitionAiguillage, uint8_t pinServo) {
 
     ServoMoteur.attach(pinServo);
 
-    int targetPosition = (etatPossitionAiguillage == 0) ? getMaxServoDroite() : getMaxServoGauche();
+    uint16_t targetPosition = (etatPossitionAiguillage == 0) ? getMaxServoDroite() : getMaxServoGauche();
 
-    int currentPosition = ServoMoteur.read();
+    uint16_t currentPosition = ServoMoteur.read();
     unsigned long previousMillis = millis();
 
     while (currentPosition != targetPosition) {
