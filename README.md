@@ -7,17 +7,17 @@ Ce projet utilise un microcontrôleur ATmega328 pour la gestion des aiguillages 
 ![Brochage des pins ATmega328](/images/pin%20atmega328p.jpg)
 
 ## Configuration des Broches
-GPIO 9 (PIN 13) : Servo
-GPIO 7 (PIN 11) : LocoNet TX
-GPIO 8 (PIN 12) : LocoNet RX
-GPIO 5 (PIN 9) : Relais
+- GPIO 9 (PIN 13) : Servo
+- GPIO 7 (PIN 11) : LocoNet TX
+- GPIO 8 (PIN 12) : LocoNet RX
+- GPIO 5 (PIN 9) : Relais
 
-GPIO 2 (PIN 01) : Pull-UP 1
-GPIO 3 (PIN 32) : Pull-UP 2
+- GPIO 2 (PIN 01) : Pull-UP 1
+- GPIO 3 (PIN 32) : Pull-UP 2
 
-GPIO 16 (PIN 25) : LED position aiguillage
-GPIO 17 (PIN 26) : LED DATA
-GPIO 18 (PIN 27) : LED ERREUR
+- GPIO 16 (PIN 25) : LED position aiguillage
+- GPIO 17 (PIN 26) : LED DATA
+- GPIO 18 (PIN 27) : LED ERREUR
 
 ## Matériel
 - Microcontrôleur ATmega328 (ou une carte Arduino compatible)
