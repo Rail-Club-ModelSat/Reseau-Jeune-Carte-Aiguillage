@@ -7,10 +7,11 @@ Ce projet utilise un microcontrôleur ATmega328 pour la gestion des aiguillages 
 ![Brochage des pins ATmega328](/images/pin%20atmega328p.jpg)
 
 ## Configuration des Broches
-- GPIO 9 (PIN 13) : Servo
-- GPIO 7 (PIN 11) : LocoNet TX
-- GPIO 8 (PIN 12) : LocoNet RX
-- GPIO 5 (PIN 9) : Relais
+- GPIO 9  (PIN 13) : Servo 1
+- GPIO 10 (PIN 14) : Servo 2 (fonctionnalité en cours de développement !)
+- GPIO 7  (PIN 11) : LocoNet TX
+- GPIO 8  (PIN 12) : LocoNet RX
+- GPIO 5  (PIN 9) : Relais
 
 - GPIO 2 (PIN 01) : Pull-UP 1
 - GPIO 3 (PIN 32) : Pull-UP 2
