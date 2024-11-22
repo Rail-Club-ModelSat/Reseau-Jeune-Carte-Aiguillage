@@ -34,21 +34,13 @@ Dans un réseau de train miniature, il devient rapidement nessaisaire de control
 <img src="images/Synoptique.JPG" alt="Synoptique" width="694">
 
 ### Matériel
-
-| **Nom du Composant**  | **Description**                 |
-|-----------------------|---------------------------------|
-| [ATmega328P](documentation/ATmega328P.pdf)            | Microcontroleur                 |
-| [MCP16331T-E/CH](documentation/MCP16331.pdf)        | Régulateur DC-DC (500 mA)       |
-| [LM1117IMPX-5.0/NOPB](documentation/LM1117.pdf)   | Régulateur 5V (800 mA)          |
-| [MICROSMD010F-2](documentation/MICROSMD010F.pdf)        | Fusible auto réarmable (250 mA) |
-| [LM393MX/NOPB](documentation/LM393.pdf)          | AOP bus LocoNet                 |
-| [G5V-2 DC5](documentation/relais.pdf)             | Relais 5V                       |
-| [MSTBA2,5](documentation/MSTB2.5femelle.pdf)               | Connecteur femelle PHOENIX CONTACT      |
-| [MSTB2,5](documentation/MSTB2.5male.pdf)               | Connecteur mâle PHOENIX CONTACT      |
-
-
+- Moteur d'aiguillage
+- Carte aiguillage
+- Z21 Noir avec routeur
 
 ### Logicielle
+- RocRail
+- Z21 application
 - Fusion 360
 - Visual Studio Code
 - PlatformIO
@@ -90,6 +82,23 @@ Ce projet utilise un microcontrôleur ATmega328 pour la gestion des aiguillages 
 | GPIO 16| 25   | LED position aiguillage           |
 | GPIO 17| 26   | LED DATA                          |
 | GPIO 18| 27   | LED ERREUR                        |
+
+### Schéma structurelle
+
+<iframe src="documentation/Schéma Carte Aiguillage.pdf" width="100%" height="500px"></iframe>
+
+### Nomenclature (BOM)
+
+| **Nom du Composant**  | **Description**                 |
+|-----------------------|---------------------------------|
+| [ATmega328P](documentation/ATmega328P.pdf)            | Microcontroleur                 |
+| [MCP16331T-E/CH](documentation/MCP16331.pdf)        | Régulateur DC-DC (500 mA)       |
+| [LM1117IMPX-5.0/NOPB](documentation/LM1117.pdf)   | Régulateur 5V (800 mA)          |
+| [MICROSMD010F-2](documentation/MICROSMD010F.pdf)        | Fusible auto réarmable (250 mA) |
+| [LM393MX/NOPB](documentation/LM393.pdf)          | AOP bus LocoNet                 |
+| [G5V-2 DC5](documentation/relais.pdf)             | Relais 5V                       |
+| [MSTBA2,5](documentation/MSTB2.5femelle.pdf)               | Connecteur femelle PHOENIX CONTACT      |
+| [MSTB2,5](documentation/MSTB2.5male.pdf)               | Connecteur mâle PHOENIX CONTACT      |
 
 ## Installation
 Assemblez le matériel selon le schéma de câblage.
