@@ -52,10 +52,10 @@ Dans un réseau de train miniature, il devient rapidement nécessaire de contrô
   </tr>
 </table>
 
+La carte Aiguillage a pour rôle de piloter un moteur d'aiguillage (servomoteur ou moteur standard) grâce à la commande reçue par le bus LocoNet.
+
 > [!Caution]  
 > Cette carte ne prend pas en charge les moteurs à impulsion.
-
-La carte Aiguillage a pour rôle de piloter un moteur d'aiguillage (servomoteur ou moteur standard) grâce à la commande reçue par le bus LocoNet.
 
 ### LocoNet
 
