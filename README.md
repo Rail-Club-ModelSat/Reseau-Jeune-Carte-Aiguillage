@@ -3,13 +3,23 @@
 
 # Carte Aiguille LocoNet
 
+</br>
+
 - [La flamme olympique 2024](#La-flamme-olympique-2024)
 - [Le projet Flamme Olympique Connecté](#Le-projet-Flamme-Olympique-Connecté-avec-véhicule-suiveur)
 - [Réplique de la Flamme](#Réplique-de-la-Flamme)
 
-Dans un réseau de train miniature, il devient rapidement nessaisaire de controler c'est aiguillage avec l'aide d'une centrale numérique du commerce.
+</br>
+
+<img src="images/Aiguillage.jpg" alt="Brochage des pins ATmega328" width="500">
+
+Dans un réseau de train miniature, il devient rapidement nessaisaire de controler c'est aiguillage à l'aide d'un ordinateur. C'est dans cette optique que fut crée une carte permetant de recevoire des ordres d'une centrale numérique du commerce par un bus (LocoNet) pour commander nos aiguillages.
 
 ## Synoptique
+
+<img src="images/Synoptique.JPG" alt="Brochage des pins ATmega328" width="500">
+
+### Schéma d'utilisation
 
 
 
