@@ -11,31 +11,47 @@
 
 </br>
 
-<img src="images/Aiguillage.jpg" alt="Brochage des pins ATmega328" width="500">
+<img src="images/Aiguillage.jpg" alt="Image d'aiguillage" width="500">
 
 Dans un réseau de train miniature, il devient rapidement nessaisaire de controler c'est aiguillage à l'aide d'un ordinateur. C'est dans cette optique que fut crée une carte permetant de recevoire des ordres d'une centrale numérique du commerce par un bus (LocoNet) pour commander nos aiguillages.
 
-## Synoptique
+<table>
+  <tr>
+    <th colspan="4">Moteur compatible</th>
+  </tr>
+  <tr>
+    <td><img src="images/moteur décapod.jpg" alt="moteur decapod" width="200" height="200" />Decapod</td>
+    <td><img src="images/moteur MTB.jpg" alt="moteur MTB" width="200" height="200" />MTB</td>
+    <td><img src="images/cobalt classic.png" alt="moteur cobalt" width="200" height="200" />Cobalt Classic</td>
+    <td><img src="images/moteur Fulgurex.jpg" alt="moteur fulgurex" width="200" height="200" />Fulgurex</td>
+  </tr>
+</table>
 
-<img src="images/Synoptique.JPG" alt="Brochage des pins ATmega328" width="500">
+## Synoptique
 
 ### Schéma d'utilisation
 
-
+<img src="images/Synoptique.JPG" alt="Synoptique" width="694">
 
 ### Matériel
-- Microcontrôleur ATmega328 (ou une carte Arduino compatible)
-- Servomoteurs pour aiguillages
-- Système Loconet pour la communication
-- LEDs pour l'indication de position, de données et d'erreur
-- Boutons avec résistances de pull-up pour les entrées de détection
+
+| **Nom du Composant**  | **Description**                 |
+|-----------------------|---------------------------------|
+| [ATmega328P](documentation/ATmega328P.pdf)            | Microcontroleur                 |
+| [MCP16331T-E/CH](documentation/MCP16331.pdf)        | Régulateur DC-DC (500 mA)       |
+| [LM1117IMPX-5.0/NOPB](documentation/LM1117.pdf)   | Régulateur 5V (800 mA)          |
+| [MICROSMD010F-2](documentation/MICROSMD010F.pdf)        | Fusible auto réarmable (250 mA) |
+| [LM393MX/NOPB](documentation/LM393.pdf)          | AOP bus LocoNet                 |
+| [G5V-2 DC5](documentation/relais.pdf)             | Relais 5V                       |
+| [MSTBA2,5](documentation/MSTB2.5femelle.pdf)               | Connecteur femelle PHOENIX CONTACT      |
+| [MSTB2,5](documentation/MSTB2.5male.pdf)               | Connecteur mâle PHOENIX CONTACT      |
+
+
 
 ### Logicielle
-- Microcontrôleur ATmega328 (ou une carte Arduino compatible)
-- Servomoteurs pour aiguillages
-- Système Loconet pour la communication
-- LEDs pour l'indication de position, de données et d'erreur
-- Boutons avec résistances de pull-up pour les entrées de détection
+- Fusion 360
+- Visual Studio Code
+- PlatformIO
 
 ### Installation et Configuration
 Le menu est contrôlé par une série de commandes qui permettent à l'utilisateur de naviguer à travers les options de configuration et de voir les réglages actuels. Voici les commandes disponibles et leur effet :
