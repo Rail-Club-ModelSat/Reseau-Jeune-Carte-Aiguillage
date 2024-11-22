@@ -6,7 +6,7 @@
 </br>
 
 - [Synoptique](#synoptique)
-- [Installation, Configuration et Câblage](#Installation,-Configuration-et-Câblage)
+- [Installation Configuration et Câblage](#Installation-Configuration-et-Câblage)
 - [Revue Technique](#revue-technique)
 
 </br>
@@ -68,7 +68,7 @@ La Z21 nous permet d'interfacer le bus LocoNet et un réseau local (LAN). Grâce
 > [!IMPORTANT]  
 > La Z21 Blanche ne comporte pas de bus LocoNet, elle n'est pas compatible.
 
-## Installation, Configuration et Câblage
+## Installation Configuration et Câblage
 
 ### Câblage de la carte
 
