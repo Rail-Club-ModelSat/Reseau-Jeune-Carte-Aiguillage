@@ -6,7 +6,7 @@
 </br>
 
 - [Synoptique](#synoptique)
-- [Installation et Configuration](#installation-et-configuration)
+- [Installation, Configuration et Câblage](#Installation,-Configuration-et-Câblage)
 - [Revue Technique](#revue-technique)
 
 </br>
